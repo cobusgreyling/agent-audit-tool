@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+audit_history.db
+results/
+custom_prompts/

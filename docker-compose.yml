@@ -1,0 +1,17 @@
+services:
+  agent-audit:
+    build: .
+    ports:
+      - "7870:7870"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - ./results:/app/results
+      - ./custom_prompts:/app/custom_prompts
+      - audit_db:/app/data
+    restart: unless-stopped
+
+volumes:
+  audit_db:

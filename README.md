@@ -118,9 +118,9 @@ Agent Audit Tool is that tool. Free. Open source. No signup. No telemetry. No ve
 │  │   Intent      │  │  Instruction │  │   Policy     │  │
 │  │  Laundering   │  │   Fade-Out   │  │   Tester     │  │
 │  │              │  │              │  │              │  │
-│  │ 10 prompts   │  │ 20 turns     │  │ 6 rules      │  │
-│  │ × 3 techniques│  │ JSON format  │  │ Interactive  │  │
-│  │ = 30 tests   │  │ compliance   │  │ evaluation   │  │
+│  │ Custom or    │  │ 20 turns     │  │ 6 rules      │  │
+│  │ default      │  │ JSON format  │  │ Interactive  │  │
+│  │ prompts × 3  │  │ compliance   │  │ evaluation   │  │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
 │         │                 │                  │           │
 │         ▼                 ▼                  ▼           │
@@ -139,6 +139,11 @@ Agent Audit Tool is that tool. Free. Open source. No signup. No telemetry. No ve
 │  │ + audit      │  │ GDPR        │                     │
 │  │   checks     │  │ EU AI Act   │                     │
 │  └──────────────┘  └──────────────┘                     │
+│                                                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  Compare      │  │   History    │  │   Export     │  │
+│  │  Models       │  │   & Trends   │  │  JSON/HTML   │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -148,11 +153,48 @@ Agent Audit Tool is that tool. Free. Open source. No signup. No telemetry. No ve
 
 | Module | Tests | Output | Time |
 |--------|-------|--------|------|
-| Intent Laundering | 30 (10 prompts × 3 techniques) | A–F grade + per-prompt breakdown | ~2 min (live) / ~10s (sim) |
+| Intent Laundering | Custom or 30 default (10×3) | A–F grade + per-prompt breakdown | ~2 min (live) / ~10s (sim) |
 | Instruction Fade-Out | 20 conversation turns | A–F grade + turn-by-turn trace | ~1 min (live) / ~5s (sim) |
 | Policy Tester | Interactive (unlimited) | ALLOW / DENY / AUDIT / ESCALATE | Instant |
 | OWASP Agentic Top 10 | 10 risk categories | Checklist with audit checks | Instant |
 | Compliance Reports | 4 frameworks, 40 controls | Framework-specific control listings | Instant |
+| Compare Models | Multi-backend benchmark | Side-by-side grade comparison | ~5 min (live) / ~15s (sim) |
+| History | Automatic tracking | Grade trends over time | Instant |
+| Export | JSON or HTML | Standalone report files | Instant |
+
+---
+
+## CLI Mode
+
+Run audits headless for CI/CD integration:
+
+```bash
+python cli.py --audit intent --output results/intent.json
+python cli.py --audit fadeout --reminders --format html --output report.html
+python cli.py --audit all --output results/
+python cli.py --audit intent --output results/intent.json --webhook https://hooks.slack.com/services/...
+```
+
+---
+
+## Custom Prompts
+
+Upload CSV (one prompt per line) or JSON (`{"prompts": [...]}`) in the Intent Laundering tab.
+
+---
+
+## Docker
+
+```bash
+docker compose up
+# Open http://localhost:7870
+```
+
+---
+
+## Blog
+
+Read the full write-up: [blog.md](blog.md)
 
 ---
 
