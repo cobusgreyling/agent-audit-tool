@@ -1278,14 +1278,158 @@ def build_ui():
             with gr.TabItem("Export"):
                 gr.Markdown(
                     "### Export Audit Reports\n"
-                    "Download your most recent audit results as JSON (for CI/CD) or HTML (for stakeholders)."
+                    "Download your most recent audit results as JSON, HTML, or PDF (for stakeholders)."
                 )
                 with gr.Row():
-                    export_format = gr.Radio(["JSON", "HTML"], label="Format", value="JSON")
+                    export_format = gr.Radio(["JSON", "HTML", "PDF"], label="Format", value="JSON")
                 export_btn = gr.Button("Export Latest Audit", variant="primary")
                 export_file = gr.File(label="Download", interactive=False)
                 export_status = gr.Textbox(label="Status", interactive=False)
-                export_btn.click(export_last_results, inputs=[export_format], outputs=[export_file, export_status])
+
+                def export_with_pdf(format_choice):
+                    if format_choice == "PDF":
+                        try:
+                            from pdf_report import generate_pdf_report
+                            history = get_history(limit=1)
+                            if not history:
+                                return None, "No audit results to export."
+                            latest = history[0]
+                            summary = json.loads(latest["summary"])
+                            data = {"audit": latest["audit_type"], "timestamp": latest["timestamp"],
+                                    "grade": latest["grade"], "score": latest["score"], "summary": summary, "results": []}
+                            path = generate_pdf_report(data)
+                            return path, f"PDF exported to {path}"
+                        except ImportError:
+                            return None, "reportlab not installed. Run: pip install reportlab"
+                    return export_last_results(format_choice)
+
+                export_btn.click(export_with_pdf, inputs=[export_format], outputs=[export_file, export_status])
+
+            # ---- Tab 9: Attack Playground ----
+            with gr.TabItem("Attack Playground"):
+                gr.Markdown(
+                    "### Interactive Attack Playground\n"
+                    "Craft and test individual adversarial prompts in real-time. "
+                    "See raw response, safety classification, and score instantly."
+                )
+                from attack_playground import (
+                    playground_test_prompt, playground_test_with_paraphrase,
+                    get_template_prompt, ATTACK_TEMPLATES, LAUNDERING_TECHNIQUES,
+                )
+                with gr.Row():
+                    with gr.Column(scale=2):
+                        pg_template = gr.Dropdown(
+                            label="Load Template",
+                            choices=[""] + list(ATTACK_TEMPLATES.keys()),
+                            value="",
+                        )
+                        pg_prompt = gr.Textbox(label="Adversarial Prompt", lines=4, placeholder="Enter or select a prompt to test...")
+                        pg_system = gr.Textbox(label="System Prompt (optional)", lines=2, value="You are a helpful assistant.")
+                        with gr.Row():
+                            pg_test_btn = gr.Button("Test Prompt", variant="primary")
+                            pg_technique = gr.Dropdown(label="Paraphrase Technique", choices=list(LAUNDERING_TECHNIQUES.keys()), value="academic")
+                            pg_compare_btn = gr.Button("Test with Paraphrase", variant="secondary")
+                    with gr.Column(scale=3):
+                        pg_grade_html = gr.HTML()
+                        pg_response_html = gr.HTML()
+                        pg_categories_html = gr.HTML()
+
+                pg_template.change(get_template_prompt, inputs=[pg_template], outputs=[pg_prompt])
+                pg_test_btn.click(playground_test_prompt, inputs=[pg_prompt, pg_system], outputs=[pg_grade_html, pg_response_html, pg_categories_html])
+                pg_compare_btn.click(playground_test_with_paraphrase, inputs=[pg_prompt, pg_technique], outputs=[pg_grade_html, pg_response_html])
+
+            # ---- Tab 10: Pipeline Audit ----
+            with gr.TabItem("Pipeline Audit"):
+                gr.Markdown(
+                    "### Multi-Agent Pipeline Audit\n"
+                    "Test chains of agents for context leakage, privilege escalation, "
+                    "trust boundary violations, prompt injection propagation, and error cascades."
+                )
+                from pipeline_audit import SAMPLE_PIPELINES, run_pipeline_audit, generate_pipeline_html
+
+                pipe_choice = gr.Dropdown(
+                    label="Select Pipeline",
+                    choices=list(SAMPLE_PIPELINES.keys()),
+                    value="customer_service",
+                )
+                pipe_run_btn = gr.Button("Run Pipeline Audit", variant="primary", size="lg")
+                pipe_results_html = gr.HTML()
+
+                def _run_pipeline(choice):
+                    pipeline = SAMPLE_PIPELINES.get(choice)
+                    if not pipeline:
+                        return "<p>Pipeline not found.</p>"
+                    result = run_pipeline_audit(pipeline)
+                    return generate_pipeline_html(result)
+
+                pipe_run_btn.click(_run_pipeline, inputs=[pipe_choice], outputs=[pipe_results_html])
+
+            # ---- Tab 11: Scoring Rubric ----
+            with gr.TabItem("Scoring Rubric"):
+                gr.Markdown(
+                    "### Scoring Rubric Editor\n"
+                    "View and customize weighted scoring criteria per audit module. "
+                    "Upload a custom YAML rubric or use the default."
+                )
+                from scoring_rubric import load_rubric, validate_rubric, apply_rubric, get_rubric_editor_html
+
+                rubric = load_rubric()
+                rubric_html = gr.HTML(get_rubric_editor_html(rubric))
+
+                rubric_file = gr.File(label="Upload Custom Rubric (YAML)", file_types=[".yaml", ".yml"], type="filepath")
+                rubric_status = gr.Textbox(label="Status", interactive=False)
+
+                def _load_custom_rubric(file_obj):
+                    if file_obj is None:
+                        r = load_rubric()
+                        return get_rubric_editor_html(r), "Using default rubric."
+                    try:
+                        with open(file_obj, "r") as f:
+                            content = f.read()
+                        is_valid, msg = validate_rubric(content)
+                        if not is_valid:
+                            return get_rubric_editor_html(load_rubric()), f"Invalid rubric: {msg}"
+                        r = load_rubric(file_obj)
+                        return get_rubric_editor_html(r), f"Loaded custom rubric: {r.name}"
+                    except Exception as e:
+                        return get_rubric_editor_html(load_rubric()), f"Error: {e}"
+
+                rubric_file.change(_load_custom_rubric, inputs=[rubric_file], outputs=[rubric_html, rubric_status])
+
+            # ---- Tab 12: Gap Analysis ----
+            with gr.TabItem("Gap Analysis"):
+                gr.Markdown(
+                    "### Compliance Gap Analysis\n"
+                    "Compare audit results against framework requirements. "
+                    "Generates actionable gap reports with pass/fail per control and remediation suggestions."
+                )
+                from gap_analysis import run_gap_analysis, generate_gap_report_html
+
+                gap_framework = gr.Dropdown(
+                    label="Framework",
+                    choices=list(COMPLIANCE_FRAMEWORKS.keys()),
+                    value="SOC 2",
+                )
+                gap_run_btn = gr.Button("Run Gap Analysis", variant="primary", size="lg")
+                gap_results_html = gr.HTML()
+
+                def _run_gap(fw):
+                    report = run_gap_analysis(fw)
+                    return generate_gap_report_html(report)
+
+                gap_run_btn.click(_run_gap, inputs=[gap_framework], outputs=[gap_results_html])
+
+            # ---- Tab 13: Token Tracking ----
+            with gr.TabItem("Token & Cost"):
+                gr.Markdown(
+                    "### Token & Cost Tracking\n"
+                    "Track token usage and estimated cost per audit run across all backends."
+                )
+                from token_tracker import get_usage_dashboard_html
+
+                token_refresh_btn = gr.Button("Refresh Usage Data", variant="secondary")
+                token_html = gr.HTML(get_usage_dashboard_html())
+                token_refresh_btn.click(get_usage_dashboard_html, outputs=[token_html])
 
     return demo
 

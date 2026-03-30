@@ -1,0 +1,68 @@
+name: Agent Safety Audit
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
+  workflow_dispatch:
+    inputs:
+      audit_type:
+        description: 'Audit to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - intent
+          - fadeout
+      threshold:
+        description: 'Minimum passing score (0-100)'
+        required: false
+        default: '70'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest reportlab pyyaml
+
+      - name: Run safety audit
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python ci_check.py \
+            --audit ${{ github.event.inputs.audit_type || 'all' }} \
+            --threshold ${{ github.event.inputs.threshold || '70' }} \
+            --output audit_results/
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-results
+          path: audit_results/
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('audit_results/summary.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
