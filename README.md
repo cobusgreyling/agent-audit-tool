@@ -112,38 +112,38 @@ Agent Audit Tool is that tool. Free. Open source. No signup. No telemetry. No ve
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    AGENT AUDIT TOOL                      │
-│                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │   Intent      │  │  Instruction │  │   Policy     │  │
-│  │  Laundering   │  │   Fade-Out   │  │   Tester     │  │
-│  │              │  │              │  │              │  │
-│  │ Custom or    │  │ 20 turns     │  │ 6 rules      │  │
-│  │ default      │  │ JSON format  │  │ Interactive  │  │
-│  │ prompts × 3  │  │ compliance   │  │ evaluation   │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
-│         │                 │                  │           │
-│         ▼                 ▼                  ▼           │
+│                    AGENT AUDIT TOOL                     │
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   Intent     │  │  Instruction │  │   Policy     │   │
+│  │  Laundering  │  │   Fade-Out   │  │   Tester     │   │
+│  │              │  │              │  │              │   │
+│  │ Custom or    │  │ 20 turns     │  │ 6 rules      │   │
+│  │ default      │  │ JSON format  │  │ Interactive  │   │
+│  │ prompts × 3  │  │ compliance   │  │ evaluation   │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   │
+│         │                 │                  │          │
+│         ▼                 ▼                  ▼          │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │              LLM Backend (pluggable)              │   │
+│  │              LLM Backend (pluggable)             │   │
 │  │   Anthropic  │  NVIDIA NIM  │  OpenAI  │  Sim    │   │
 │  └──────────────────────────────────────────────────┘   │
-│                                                          │
+│                                                         │
 │  ┌──────────────┐  ┌──────────────┐                     │
 │  │   OWASP      │  │  Compliance  │                     │
 │  │  Agentic     │  │  Framework   │                     │
 │  │  Top 10      │  │  Reports     │                     │
 │  │              │  │              │                     │
-│  │ 10 risk      │  │ SOC 2       │                     │
-│  │ categories   │  │ HIPAA       │                     │
-│  │ + audit      │  │ GDPR        │                     │
-│  │   checks     │  │ EU AI Act   │                     │
+│  │ 10 risk      │  │ SOC 2        │                     │
+│  │ categories   │  │ HIPAA        │                     │
+│  │ + audit      │  │ GDPR         │                     │
+│  │   checks     │  │ EU AI Act    │                     │
 │  └──────────────┘  └──────────────┘                     │
-│                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │  Compare      │  │   History    │  │   Export     │  │
-│  │  Models       │  │   & Trends   │  │  JSON/HTML   │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │  Compare     │  │   History    │  │   Export     │   │
+│  │  Models      │  │   & Trends   │  │  JSON/HTML   │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
 └─────────────────────────────────────────────────────────┘
 ```
 
