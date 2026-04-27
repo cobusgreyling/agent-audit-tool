@@ -110,7 +110,7 @@ def run_fadeout_cli(use_reminders=False):
             max_tokens=512,
         )
         if response is None:
-            fail_chance = (0.05 + i * 0.01) if use_reminders else (0.02 + i * 0.04)
+            fail_chance = (0.05 + i * 0.01) if use_reminders else (0.02 + i * 0.015)
             compliant = random.random() > fail_chance
             reason = "Valid JSON" if compliant else random.choice(["NOT JSON", "MISSING KEYS", "EXTRA TEXT"])
         else:
